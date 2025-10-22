@@ -28,4 +28,9 @@ public class Post {
     @Column(nullable = false)
     @Builder.Default        //@Builder 사용 시 필드 기본 값 유지하도록 지정
     private Long views = 0L; //조회수
+
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 }

@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 public class PostService {
@@ -49,13 +52,13 @@ public class PostService {
         // 1. postId를 통해서 Post 조회, 예외 처리 필요
         Post post = postRepository.findById(postId).orElse(null);
         // 2. 해당 post의 값을 변경
-        Post savedPost = postRepository.save(post);
+        post.update(updatePostRequestDto.getTitle(), updatePostRequestDto.getContent());
         // 3. postResponseDto에 해당 Post 내용을 담아서 반환
         return PostResponseDto.builder()
-                .id(savedPost.getId())
-                .title(savedPost.getTitle())
-                .content(savedPost.getContent())
-                .views(savedPost.getViews())
+                .id(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .views(post.getViews())
                 .build();
     }
     @Transactional
@@ -68,6 +71,27 @@ public class PostService {
         else {
             return postId + "번 게시글이 존재하지 않습니다.";
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostResponseDto> readPostList(){
+        // 1. DB에서 모든 post들을 조회
+        List<Post> posts = postRepository.findAll();
+
+        // 2. 조회된 post들을 PostResponseDto로 반복문을 통해 변환
+        List<PostResponseDto> responseDtos = new ArrayList<>();
+
+        for(Post post : posts){
+            PostResponseDto postResponseDto = PostResponseDto.builder()
+                    .id(post.getId())
+                    .title(post.getTitle())
+                    .content(post.getContent())
+                    .views(post.getViews())
+                    .build();
+            responseDtos.add(postResponseDto);
+        }
+
+        return responseDtos;
     }
 
 
