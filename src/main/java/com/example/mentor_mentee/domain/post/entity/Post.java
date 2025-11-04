@@ -1,10 +1,14 @@
 package com.example.mentor_mentee.domain.post.entity;
 
+import com.example.mentor_mentee.domain.Comment.entity.Comment;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity                 //이 클래스를 테이블과 매핑되는 엔티티로 인식하게
 @Getter
@@ -28,6 +32,10 @@ public class Post {
     @Column(nullable = false)
     @Builder.Default        //@Builder 사용 시 필드 기본 값 유지하도록 지정
     private Long views = 0L; //조회수
+
+    @OneToMany(mappedBy = "post")
+    @Builder.Default
+    private List<Comment> comments = new ArrayList<>();
 
     public void update(String title, String content) {
         this.title = title;

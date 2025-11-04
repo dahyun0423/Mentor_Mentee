@@ -1,5 +1,6 @@
 package com.example.mentor_mentee.domain.Comment.entity;
 
+import com.example.mentor_mentee.domain.post.entity.Post;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,5 +22,10 @@ public class Comment {
 
     @Column(nullable = false)
     private String content;  //내용
+
+    //N:1 관계
+    @ManyToOne(fetch = FetchType.LAZY)          //FetchType.LAZY : 지연로딩
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
 }
