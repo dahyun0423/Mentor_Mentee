@@ -1,8 +1,10 @@
 package com.example.mentor_mentee.domain.post.service;
 
-
+import com.example.mentor_mentee.domain.Comment.dto.response.CommentResponseDto;
+import com.example.mentor_mentee.domain.Comment.entity.Comment;
 import com.example.mentor_mentee.domain.post.dto.request.CreatePostRequestDto;
 import com.example.mentor_mentee.domain.post.dto.request.UpdatePostRequestDto;
+import com.example.mentor_mentee.domain.post.dto.response.PostListResponseDto;
 import com.example.mentor_mentee.domain.post.dto.response.PostResponseDto;
 import com.example.mentor_mentee.domain.post.entity.Post;
 import com.example.mentor_mentee.domain.post.repository.PostRepository;
@@ -31,24 +33,37 @@ public class PostService {
                 .id(savedPost.getId())
                 .title(savedPost.getTitle())
                 .content(savedPost.getContent())
-                .views(savedPost.getViews())
                 .build();
     }
-    @Transactional(readOnly = true)//CRUD의 READ : 읽기
-    public PostResponseDto readPost(Long postId) {
-        //1. postId를 통해서 Post 조회 (findById), 예외처리 필요
+
+    @Transactional(readOnly = true)
+    public PostResponseDto readPost(Long postId){
+        // 1. postId를 통해서 Post 조회, 예외처리 필요
         Post post = postRepository.findById(postId).orElse(null);
 
-        // 2. postResponseDto에 해당 Post 내용을 담아서 반환
+        //2. post로부터 comment 리스트를 CommentResponseDto로 변환
+        List<Comment> comments = post.getComments();
+        List<CommentResponseDto> commentResponseDtos = new ArrayList<>();
+
+        for (Comment comment : comments) {
+            commentResponseDtos.add(CommentResponseDto.builder()
+                    .id(comment.getId())
+                    .content(comment.getContent())
+                    .build());
+        }
+
+        // 3. postResponseDto에 해당 Post 내용을 담아서 반환
         return PostResponseDto.builder()
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .views(post.getViews())
+                .commentCount(post.getComments().size())
+                .comments(commentResponseDtos)
                 .build();
     }
+
     @Transactional //CRUD의 UPDATE : 업데이트
-    public PostResponseDto updatePost(UpdatePostRequestDto updatePostRequestDto, Long postId){
+    public PostResponseDto updatePost(UpdatePostRequestDto updatePostRequestDto, Long postId) {
         // 1. postId를 통해서 Post 조회, 예외 처리 필요
         Post post = postRepository.findById(postId).orElse(null);
         // 2. 해당 post의 값을 변경
@@ -58,37 +73,57 @@ public class PostService {
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .views(post.getViews())
                 .build();
     }
+
     @Transactional
     public String deletePost(Long postId) {
         //1. postId를 통해 Post 존재여부 조회, 존재 여부에 따라 삭제 조건문 필요
-        if(postRepository.existsById(postId)){
+        if (postRepository.existsById(postId)) {
             postRepository.deleteById(postId);
             return postId + "번 게시글 삭제 완료";
-        }
-        else {
+        } else {
             return postId + "번 게시글이 존재하지 않습니다.";
         }
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponseDto> readPostList(){
+    public List<PostListResponseDto> readAllPosts() {
+        //1. DB에서 모든 post들을 조회
+        List<Post> posts = postRepository.findAll();
+
+        //2. 조회된 post들을 PostResponseDto로 반복문을 통해 반환
+        List<PostListResponseDto> responseDtos = new ArrayList<>();
+        for (Post post : posts) {
+            String content = post.getContent();
+            String contentSummary = content.length() > 30 ? content.substring(0, 30) + "..." : content;
+            responseDtos.add(PostListResponseDto.builder()
+                    .id(post.getId())
+                    .title(post.getTitle())
+                    .contentSummary(contentSummary)
+                    .commentCount(post.getComments().size())
+                    .build());
+        }
+        return responseDtos;
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<PostListResponseDto> readPostList() {
         // 1. DB에서 모든 post들을 조회
         List<Post> posts = postRepository.findAll();
 
         // 2. 조회된 post들을 PostResponseDto로 반복문을 통해 변환
-        List<PostResponseDto> responseDtos = new ArrayList<>();
-
-        for(Post post : posts){
-            PostResponseDto postResponseDto = PostResponseDto.builder()
+        List<PostListResponseDto> responseDtos = new ArrayList<>();
+        for (Post post : posts) {
+            String content = post.getContent();
+            String contentSummary = content.length() > 30 ? content.substring(0, 30) + "..." : content;
+            responseDtos.add(PostListResponseDto.builder()
                     .id(post.getId())
                     .title(post.getTitle())
-                    .content(post.getContent())
-                    .views(post.getViews())
-                    .build();
-            responseDtos.add(postResponseDto);
+                    .contentSummary(contentSummary)
+                    .commentCount(post.getComments().size())
+                    .build());
         }
 
         return responseDtos;

@@ -4,6 +4,8 @@ import com.example.mentor_mentee.domain.Comment.dto.request.CommentRequestDto;
 import com.example.mentor_mentee.domain.Comment.dto.response.CommentResponseDto;
 import com.example.mentor_mentee.domain.Comment.entity.Comment;
 import com.example.mentor_mentee.domain.Comment.service.CommentService;
+import com.example.mentor_mentee.domain.post.service.PostService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,30 +14,16 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/comments")
 public class CommentController {
     private final CommentService commentService;
+    private final PostService postService;
 
-    @PostMapping
-    public CommentResponseDto createComment(@RequestBody CommentRequestDto commentRequestDto) {
-        CommentResponseDto responsDto = commentService.createComment(commentRequestDto);
-        return responsDto;
-    }
-
-    @GetMapping
-    public String getAllComments(){
-        return "댓글 리스트 조회 완료";
-    }
-
-    @GetMapping("/{comment-id}")
-    public String getCommentById(@PathVariable(value = "comment-id") Long id){
-        return id +"번 댓글 조회 완료";
-    }
-
-    @PutMapping("/{comment-id}")
-    public String updateComment(@PathVariable(value = "comment-id") Long id){
-        return id +"번 댓글 수정 완료";
+    @PostMapping("/{post-id}")
+    public CommentResponseDto createComment(@PathVariable(value = "post-id") Long postId, @RequestBody CommentRequestDto commentRequestDto) {
+        CommentResponseDto responseDto = commentService.createComment(postId, commentRequestDto);
+        return responseDto;
     }
 
     @DeleteMapping("/{comment-id}")
-    public String deleteComment(@PathVariable(value = "comment-id") Long id){
-        return id +"번 댓글 삭제 완료";
+    public String deleteComment(@PathVariable(value = "post-id")Long postId, @PathVariable(value = "comment-id") Long commentId) {
+        return commentService.deleteComment(postId, commentId);
     }
 }

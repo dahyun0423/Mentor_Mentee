@@ -2,11 +2,14 @@ package com.example.mentor_mentee.domain.post.controller;
 
 import com.example.mentor_mentee.domain.post.dto.request.CreatePostRequestDto;
 import com.example.mentor_mentee.domain.post.dto.request.UpdatePostRequestDto;
+import com.example.mentor_mentee.domain.post.dto.response.PostListResponseDto;
 import com.example.mentor_mentee.domain.post.dto.response.PostResponseDto;
 import com.example.mentor_mentee.domain.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.sql.Update;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController  //해당 클래스가 Web 요청을 담당하는 컨트롤러 기능을 수행
@@ -21,8 +24,9 @@ public class PostController {
     }
 
     @GetMapping
-    public String getAllPosts(){
-        return "게시글 리스트 조회 완료";
+    public List<PostListResponseDto> getAllPosts() {
+        List<PostListResponseDto> responseDtos = postService.readPostList();
+        return responseDtos;
     }
 
     @GetMapping("/{post-id}") //비공개 게시글이라면 사용자의 아이디와 같이 일치한지 아닌지 처리를 해서 사용자의 아이디를 받는 경우도 있다.

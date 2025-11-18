@@ -29,10 +29,6 @@ public class Post {
     @Column(nullable = false)
     private String content; //내용
 
-    @Column(nullable = false)
-    @Builder.Default        //@Builder 사용 시 필드 기본 값 유지하도록 지정
-    private Long views = 0L; //조회수
-
     @OneToMany(mappedBy = "post")
     @Builder.Default
     private List<Comment> comments = new ArrayList<>();
